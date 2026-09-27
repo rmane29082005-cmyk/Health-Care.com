@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>HealthCare Clinic</title>
+    <style>
+        .medical-gradient {
+            background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+        }
+        .hero-gradient {
+            background: linear-gradient(rgba(220, 38, 38, 0.9), rgba(153, 27, 27, 0.8)), 
+                        url('https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+            background-size: cover;
+            background-position: center;
+        }
+        .service-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid #dc2626;
+        }
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .emergency-badge {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .admin-modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .success-message {
+            display: none;
+            background-color: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+        .appointment-item {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 1rem 0;
+        }
+        .appointment-item:last-child {
+            border-bottom: none;
+        }
+        .fake-loading-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:9999;justify-content:center;align-items:center}.fake-loading-box{background:#fff;width:90%;max-width:420px;padding:35px;border-radius:16px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.25)}.fake-loader{width:55px;height:55px;border:5px solid #e5e7eb;border-top:5px solid #dc2626;border-radius:50%;animation:fakeSpin 1s linear infinite;margin:10px auto 20px}@keyframes fakeSpin{to{transform:rotate(360deg)}}.fake-success-icon{font-size:60px;color:#16a34a;margin-bottom:15px}
+    </style>
+</head>
+<body class="font-sans">
+
+    <!-- Emergency Contact Banner -->
+    <div class="bg-yellow-500 text-white py-2 px-4 text-center text-sm font-semibold">
+        <i class="fas fa-phone-alt mr-2"></i>Emergency Contact: 240-XXXX-XXXX | 24/7 Available
+    </div>
+
+    <!-- Header -->
+    <header class="text-white medical-gradient fixed top-0 w-full z-50 shadow-lg">
+        <div class="container mx-auto flex flex-wrap p-4 flex-col md:flex-row items-center">
+            <div class="flex title-font font-medium items-center text-white mb-4 md:mb-0">
+                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-stethoscope text-red-600 text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-bold">HealthCare</span>
+                    <span class="block text-xs text-red-200">DR.L.S.PAL Clinic</span>
+                </div>
+            </div>
+            
+            <nav class="md:ml-auto md:mr-auto flex flex-wrap items-center text-base justify-center">
+                <a href="#about" class="mr-6 hover:text-green-300 font-medium transition duration-300">
+                    <i class="fas fa-home mr-1"></i>Home
+                </a>
+                <a href="#details" class="mr-6 hover:text-green-300 font-medium transition duration-300">
+                    <i class="fas fa-user-md mr-1"></i>Doctor
+                </a>
+                <a href="#services" class="mr-6 hover:text-green-300 font-medium transition duration-300">
+                    <i class="fas fa-procedures mr-1"></i>Services
+                </a>
+                <a href="#contact" class="mr-6 hover:text-green-300 font-medium transition duration-300">
+                    <i class="fas fa-comment-medical mr-1"></i>Feedback
+                </a>
+            </nav>
+            
+            <div class="flex space-x-2">
+                <button id="book-appointment-btn" class="inline-flex items-center bg-white text-red-600 border-0 py-2 px-6 focus:outline-none hover:bg-green-50 rounded-lg text-base font-semibold shadow-md transition duration-300">
+                    <i class="fas fa-calendar-check mr-2"></i>Book Appointment
+                </button>
+                <button id="admin-panel-btn" class="inline-flex items-center bg-blue-500 text-white border-0 py-2 px-6 focus:outline-none hover:bg-blue-600 rounded-lg text-base font-semibold shadow-md transition duration-300">
+                    <i class="fas fa-user-shield mr-2"></i>Admin
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="about" class="text-white hero-gradient pt-24 pb-20">
+        <div class="container mx-auto flex px-5 py-20 items-center justify-center flex-col">
+            <div class="text-center lg:w-2/3 w-full">
+                <h1 class="title-font sm:text-5xl text-4xl mb-6 font-bold leading-tight">
+                    Your Health is Our <span class="text-green-300">Priority</span>
+                </h1>
+                <p class="mb-8 leading-relaxed text-xl opacity-90">
+                    Comprehensive Healthcare Services with Compassion and Excellence
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <button class="bg-white text-red-600 border-0 py-3 px-8 focus:outline-none hover:bg-green-50 rounded-lg text-lg font-semibold shadow-lg transition duration-300">
+                        <i class="fas fa-phone-alt mr-2"></i>Call Now
+                    </button>
+                    <button class="bg-transparent text-white border-2 border-white py-3 px-8 focus:outline-none hover:bg-white hover:text-red-600 rounded-lg text-lg font-semibold transition duration-300">
+                        <i class="fas fa-directions mr-2"></i>Get Directions
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="text-gray-600 body-font bg-gray-50 py-12">
+        <div class="container px-5 py-8 mx-auto">
+            <div class="flex flex-wrap -m-4 text-center">
+                <div class="p-4 sm:w-1/4 w-1/2">
+                    <div class="border-2 border-red-200 px-4 py-6 rounded-lg bg-white shadow-sm">
+                        <i class="fas fa-users text-red-600 text-3xl mb-4"></i>
+                        <h2 class="title-font font-medium text-3xl text-gray-900">10,000+</h2>
+                        <p class="leading-relaxed">Happy Patients</p>
+                    </div>
+                </div>
+                <div class="p-4 sm:w-1/4 w-1/2">
+                    <div class="border-2 border-red-200 px-4 py-6 rounded-lg bg-white shadow-sm">
+                        <i class="fas fa-user-md text-red-600 text-3xl mb-4"></i>
+                        <h2 class="title-font font-medium text-3xl text-gray-900">15+</h2>
+                        <p class="leading-relaxed">Years Experience</p>
+                    </div>
+                </div>
+                <div class="p-4 sm:w-1/4 w-1/2">
+                    <div class="border-2 border-red-200 px-4 py-6 rounded-lg bg-white shadow-sm">
+                        <i class="fas fa-procedures text-red-600 text-3xl mb-4"></i>
+                        <h2 class="title-font font-medium text-3xl text-gray-900">50+</h2>
+                        <p class="leading-relaxed">Services</p>
+                    </div>
+                </div>
+                <div class="p-4 sm:w-1/4 w-1/2">
+                    <div class="border-2 border-red-200 px-4 py-6 rounded-lg bg-white shadow-sm">
+                        <i class="fas fa-clock text-red-600 text-3xl mb-4"></i>
+                        <h2 class="title-font font-medium text-3xl text-gray-900">24/7</h2>
+                        <p class="leading-relaxed">Emergency</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Doctor Details Section -->
+    <section id="details" class="text-gray-900 body-font bg-white py-16">
+        <div class="container mx-auto flex px-5 py-12 md:flex-row flex-col items-center">
+            <div class="lg:max-w-lg lg:w-full md:w-1/2 w-5/6 mb-10 md:mb-0">
+                <div class="relative">
+                    <img class="object-cover object-center rounded-lg shadow-2xl w-full h-96" 
+                         src="https://i.ibb.co/HytdNW6/Whats-App-Image-2025-11-01-at-4-05-15-PM.jpg" 
+                         alt="Dr. Anil S. Pachnekar">
+                    <div class="absolute -bottom-4 -right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg">
+                        <div class="text-center">
+                            <div class="font-bold text-lg">15+ Years</div>
+                            <div class="text-sm">Experience</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:flex-grow md:w-1/2 lg:pl-24 md:pl-16 flex flex-col md:items-start md:text-left items-center text-center">
+                <h1 class="title-font sm:text-4xl text-3xl mb-4 font-medium text-gray-900">
+                    Dr. L.S.PAL
+                    <br class="hidden lg:inline-block">
+                    <span class="text-lg text-red-600 font-semibold">D.H.M.S, C.G.O</span>
+                    <br>
+                    <span class="text-lg text-gray-600">PHYSICIAN & SURGEON</span>
+                </h1>
+                <div class="mb-8 leading-relaxed text-gray-700 space-y-3">
+                    <p class="flex items-center">
+                        <i class="fas fa-map-marker-alt text-red-500 mr-3 w-5"></i>
+                        <strong class="w-24">Address:</strong> 
+                        <span>GNM/95/475 Mukund Nagar,Weird,Dharavi, Mumbai-400017.</span>
+                    </p>
+                    <p class="flex items-center">
+                        <i class="fas fa-sun text-yellow-500 mr-3 w-5"></i>
+                        <strong class="w-24">Morning:</strong> 
+                        <span>1:00 AM to 5:00 PM</span>
+                    </p>
+                    <p class="flex items-center">
+                        <i class="fas fa-moon text-blue-500 mr-3 w-5"></i>
+                        <strong class="w-24">Evening:</strong> 
+                        <span>7:30 PM to 11:00 PM</span>
+                    </p>
+                    <p class="flex items-center">
+                        <i class="fas fa-phone text-green-500 mr-3 w-5"></i>
+                        <strong class="w-24">Contact:</strong> 
+                        <span class="emergency-badge bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold">240-XXXX-XXXX</span>
+                    </p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">General Medicine</span>
+                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">Surgery</span>
+                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-medium">Emergency Care</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="text-gray-600 body-font bg-gray-50 py-16">
+        <div class="container px-5 py-12 mx-auto">
+            <div class="text-center mb-16">
+                <h1 class="sm:text-4xl text-3xl font-bold title-font text-gray-900 mb-4">Our Medical Services</h1>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Comprehensive healthcare services with modern equipment and expert care</p>
+            </div>
+            
+            <div class="flex flex-wrap -m-4">
+                
+                <div class="lg:w-1/4 md:w-1/2 p-4 w-full">
+                    <div class="service-card bg-white p-6 rounded-lg shadow-md h-full">
+                        <div class="block relative h-48 rounded overflow-hidden mb-4">
+                            <img alt="Blood Report" class="object-cover object-center w-full h-full block" src="https://i.postimg.cc/Ls24rNCZ/Whats-App-Image-2025-09-24-at-4-30-23-PM.jpg">
+                        </div>
+                        <div class="mt-4">
+                            <h3 class="text-red-500 text-xs tracking-widest title-font mb-1">DIAGNOSTIC</h3>
+                            <h2 class="text-gray-900 title-font text-lg font-medium mb-2">Blood Report</h2>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-green-600">₹350</span>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="lg:w-1/4 md:w-1/2 p-4 w-full">
+                    <div class="service-card bg-white p-6 rounded-lg shadow-md h-full">
+                        <div class="block relative h-48 rounded overflow-hidden mb-4">
+                            <img alt="X-Ray" class="object-cover object-center w-full h-full block" src="https://i.postimg.cc/JnCVBnJV/owen-beard-DK8j-Xx1-B-1c-unsplash.jpg">
+                        </div>
+                        <div class="mt-4">
+                            <h3 class="text-red-500 text-xs tracking-widest title-font mb-1">DIAGNOSTIC</h3>
+                            <h2 class="text-gray-900 title-font text-lg font-medium mb-2">X-Ray</h2>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-green-600">₹500</span>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="lg:w-1/4 md:w-1/2 p-4 w-full">
+                    <div class="service-card bg-white p-6 rounded-lg shadow-md h-full">
+                        <div class="block relative h-48 rounded overflow-hidden mb-4">
+                            <img alt="CT Scan" class="object-cover object-center w-full h-full block" src="https://i.postimg.cc/tCq1xRtx/accuray-QTP8-UKW-Pg-I-unsplash.jpg">
+                        </div>
+                        <div class="mt-4">
+                            <h3 class="text-red-500 text-xs tracking-widest title-font mb-1">DIAGNOSTIC</h3>
+                            <h2 class="text-gray-900 title-font text-lg font-medium mb-2">CT Scan</h2>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-green-600">₹500</span>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="lg:w-1/4 md:w-1/2 p-4 w-full">
+                    <div class="service-card bg-white p-6 rounded-lg shadow-md h-full">
+                        <div class="block relative h-48 rounded overflow-hidden mb-4">
+                            <img alt="Diabetes Check" class="object-cover object-center w-full h-full block" src="https://i.postimg.cc/4NYgMrX0/jasmin-ne-z-Iwb4-Xbmm-H0-unsplash.jpg">
+                        </div>
+                        <div class="mt-4">
+                            <h3 class="text-red-500 text-xs tracking-widest title-font mb-1">CHECKUP</h3>
+                            <h2 class="text-gray-900 title-font text-lg font-medium mb-2">Diabetes & Blood Checking</h2>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-green-600">₹350</span>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="lg:w-1/4 md:w-1/2 p-4 w-full">
+                    <div class="service-card bg-white p-6 rounded-lg shadow-md h-full">
+                        <div class="block relative h-48 rounded overflow-hidden mb-4">
+                            <img alt="Saline" class="object-cover object-center w-full h-full block" src="https://i.postimg.cc/2S8rGVV4/Whats-App-Image-2025-09-24-at-4-34-14-PM.jpg">
+                        </div>
+                        <div class="mt-4">
+                            <h3 class="text-red-500 text-xs tracking-widest title-font mb-1">TREATMENT</h3>
+                            <h2 class="text-gray-900 title-font text-lg font-medium mb-2">Saline</h2>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-green-600">₹450</span>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="lg:w-1/4 md:w-1/2 p-4 w-full">
+                    <div class="service-card bg-white p-6 rounded-lg shadow-md h-full">
+                        <div class="block relative h-48 rounded overflow-hidden mb-4">
+                            <img alt="Physical Health Guide" class="object-cover object-center w-full h-full block" src="https://i.postimg.cc/FKsGCQ4d/mina-rad-UYBAbwaq-NIg-unsplash.jpg">
+                        </div>
+                        <div class="mt-4">
+                            <h3 class="text-red-500 text-xs tracking-widest title-font mb-1">CONSULTATION</h3>
+                            <h2 class="text-gray-900 title-font text-lg font-medium mb-2">Physical Health Guide</h2>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-green-600">₹200</span>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="lg:w-1/4 md:w-1/2 p-4 w-full">
+                    <div class="service-card bg-white p-6 rounded-lg shadow-md h-full">
+                        <div class="block relative h-48 rounded overflow-hidden mb-4">
+                            <img alt="Physiotherapy" class="object-cover object-center w-full h-full block" src="https://i.postimg.cc/jdLgtTwz/sincerely-media-w-GFib-XDQl-BI-unsplash.jpg">
+                        </div>
+                        <div class="mt-4">
+                            <h3 class="text-red-500 text-xs tracking-widest title-font mb-1">THERAPY</h3>
+                            <h2 class="text-gray-900 title-font text-lg font-medium mb-2">Physiotherapy</h2>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-green-600">₹1500</span>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div class="lg:w-1/4 md:w-1/2 p-4 w-full">
+                    <div class="service-card bg-white p-6 rounded-lg shadow-md h-full">
+                        <div class="block relative h-48 rounded overflow-hidden mb-4">
+                            <img alt="Medicine" class="object-cover object-center w-full h-full block" src="https://i.postimg.cc/1XPK6xJ3/Whats-App-Image-2025-09-24-at-4-27-33-PM.jpg">
+                        </div>
+                        <div class="mt-4">
+                            <h3 class="text-red-500 text-xs tracking-widest title-font mb-1">PHARMACY</h3>
+                            <h2 class="text-gray-900 title-font text-lg font-medium mb-2">Medicine</h2>
+                            <div class="flex justify-between items-center">
+                                <span class="font-bold text-green-600">₹300</span>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Feedback Section -->
+    <section id="contact" class="text-gray-600 body-font bg-white py-16">
+        <div class="container mx-auto flex flex-col px-5 py-12 justify-center items-center">
+            <div class="w-full md:w-2/3 flex flex-col mb-16 items-center text-center">
+                <h1 class="title-font sm:text-4xl text-3xl mb-4 font-bold text-red-900">
+                    <i class="fas fa-comment-medical mr-3"></i>Your Feedback Matters
+                </h1>
+                <p class="text-lg text-gray-600 mb-8">Help us serve you better with your valuable feedback</p>
+                
+                <!-- Formspree Form -->
+                <form id="feedback-form" class="w-full max-w-2xl">
+                    <div class="flex w-full justify-center items-end">
+                        <div class="relative mr-4 lg:w-full xl:w-1/2 w-2/4 md:w-full text-left">
+                            <label for="feedback-field" class="leading-7 text-sm text-red-600 font-medium">Your Feedback</label>
+                            <input type="text" id="feedback-field" name="feedback" 
+                                   class="w-full bg-gray-100 bg-opacity-50 rounded-lg border border-gray-300 focus:border-red-500 focus:bg-white focus:ring-2 focus:ring-red-200 text-base outline-none text-gray-700 py-3 px-4 leading-8 transition-colors duration-200 ease-in-out"
+                                   placeholder="Share your experience with us..." required>
+                        </div>
+                        <button type="submit" class="inline-flex items-center text-white medical-gradient border-0 py-3 px-8 focus:outline-none hover:bg-red-700 rounded-lg text-lg font-semibold shadow-md transition duration-300">
+                            <i class="fas fa-paper-plane mr-2"></i>Submit
+                        </button>
+                    </div>
+                </form>
+                
+                <p class="text-sm mt-3 text-green-500 mb-8 w-full">
+                    <i class="fas fa-heart text-red-500 mr-1"></i>Your feedback helps us improve our services
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-gray-600 body-font medical-gradient">
+        <div class="container px-5 py-8 mx-auto flex items-center sm:flex-row flex-col">
+            <div class="flex title-font font-medium items-center text-white md:justify-start justify-center">
+                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-stethoscope text-red-600"></i>
+                </div>
+                <span class="ml-3 text-xl font-bold">HealthCare Clinic</span>
+            </div>
+            <p class="text-sm text-red-100 sm:ml-4 sm:pl-4 sm:border-l-2 sm:border-red-300 sm:py-2 sm:mt-0 mt-4">
+                © 2024 Dr. L.S.Clinic — 
+                <a href="#" class="text-white ml-1" rel="noopener noreferrer" target="_blank">Your Health Partner</a>
+            </p>
+            <span class="inline-flex sm:ml-auto sm:mt-0 mt-4 justify-center sm:justify-start">
+                <a class="text-red-100 hover:text-white ml-3">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a class="text-red-100 hover:text-white ml-3">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a class="text-red-100 hover:text-white ml-3">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a class="text-red-100 hover:text-white ml-3">
+                    <i class="fab fa-linkedin-in"></i>
+                </a>
+            </span>
+        </div>
+    </footer>
+
+    <!-- Fake Backend Loading Screen --><div id="fake-loading" class="fake-loading-overlay"><div class="fake-loading-box"><div id="loading-spinner"><div class="fake-loader"></div><h2 id="loading-title" class="text-2xl font-bold text-gray-800">Connecting to server...</h2><p id="loading-text" class="text-gray-500 mt-2">Please wait...</p></div><div id="loading-success" style="display:none"><div class="fake-success-icon"><i class="fas fa-check-circle"></i></div><h2 id="success-title" class="text-2xl font-bold text-gray-800">Completed Successfully</h2><p id="success-text" class="text-gray-500 mt-2">Your request has been processed.</p><button id="loading-close" type="button" class="mt-5 bg-red-600 text-white py-2 px-6 rounded-lg font-semibold hover:bg-red-700">OK</button></div></div></div>
+
+    <!-- Appointment Booking Modal -->
+    <div id="appointment-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Book an Appointment</h2>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <form id="appointment-form">
+                <div class="mb-4">
+                    <label for="patient-name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input type="text" id="patient-name" name="patient-name" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" 
+                           placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="patient-phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    <input type="tel" id="patient-phone" name="patient-phone" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" 
+                           placeholder="Enter your phone number" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="patient-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input type="email" id="patient-email" name="patient-email" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" 
+                           placeholder="Enter your email address">
+                </div>
+                
+                <div class="mb-4">
+                    <label for="appointment-date" class="block text-sm font-medium text-gray-700 mb-1">Preferred Date</label>
+                    <input type="date" id="appointment-date" name="appointment-date" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" 
+                           required>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="appointment-time" class="block text-sm font-medium text-gray-700 mb-1">Preferred Time</label>
+                    <select id="appointment-time" name="appointment-time" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" 
+                            required>
+                        <option value="">Select a time</option>
+                        <option value="morning">Morning (1:00 AM - 5:00 PM)</option>
+                        <option value="evening">Evening (7:30 PM - 11:00 PM)</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="appointment-reason" class="block text-sm font-medium text-gray-700 mb-1">Reason for Visit</label>
+                    <textarea id="appointment-reason" name="appointment-reason" rows="3" 
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500" 
+                              placeholder="Briefly describe your symptoms or reason for visit"></textarea>
+                </div>
+                
+                <button type="submit" class="w-full bg-red-600 text-white py-3 px-4 rounded-md hover:bg-red-700 transition duration-300 font-semibold">
+                    <i class="fas fa-calendar-check mr-2"></i>Confirm Appointment
+                </button>
+            </form>
+            
+            <div id="success-message" class="success-message">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span>Your appointment has been booked successfully! We'll contact you shortly to confirm.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div id="admin-modal" class="modal-overlay">
+        <div class="admin-modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Appointment Management</h2>
+                <button id="close-admin-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-semibold text-gray-700">All Booked Appointments</h3>
+                    <button id="refresh-appointments" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh
+                    </button>
+                </div>
+                <p class="text-sm text-gray-500 mt-1">View and manage all patient appointments</p>
+            </div>
+            
+            <div id="appointments-list" class="max-h-96 overflow-y-auto">
+                <!-- Appointments will be displayed here -->
+            </div>
+            
+            <div class="mt-6 flex justify-between">
+                <button id="clear-all-appointments" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition duration-300">
+                    <i class="fas fa-trash mr-2"></i>Clear All Appointments
+                </button>
+                <button id="export-appointments" class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition duration-300">
+                    <i class="fas fa-download mr-2"></i>Export to CSV
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal functionality
+        const bookAppointmentBtn = document.getElementById('book-appointment-btn');
+        const appointmentModal = document.getElementById('appointment-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const appointmentForm = document.getElementById('appointment-form');
+        const successMessage = document.getElementById('success-message');
+        
+        // Admin panel functionality
+        const adminPanelBtn = document.getElementById('admin-panel-btn');
+        const adminModal = document.getElementById('admin-modal');
+        const closeAdminModalBtn = document.getElementById('close-admin-modal');
+        const appointmentsList = document.getElementById('appointments-list');
+        const refreshAppointmentsBtn = document.getElementById('refresh-appointments');
+        const clearAllAppointmentsBtn = document.getElementById('clear-all-appointments');
+        const exportAppointmentsBtn = document.getElementById('export-appointments');
+
+        // Open appointment modal
+        bookAppointmentBtn.addEventListener('click', () => {
+            appointmentModal.style.display = 'flex';
+        });
+
+        // Close appointment modal
+        closeModalBtn.addEventListener('click', () => {
+            appointmentModal.style.display = 'none';
+            successMessage.style.display = 'none';
+        });
+
+        // Open admin modal
+        adminPanelBtn.addEventListener('click', () => {
+            adminModal.style.display = 'flex';
+            loadAppointments();
+        });
+
+        // Close admin modal
+        closeAdminModalBtn.addEventListener('click', () => {
+            adminModal.style.display = 'none';
+        });
+
+        // Close modals when clicking outside
+        appointmentModal.addEventListener('click', (e) => {
+            if (e.target === appointmentModal) {
+                appointmentModal.style.display = 'none';
+                successMessage.style.display = 'none';
+            }
+        });
+
+        adminModal.addEventListener('click', (e) => {
+            if (e.target === adminModal) {
+                adminModal.style.display = 'none';
+            }
+        });
+
+        // Handle appointment form submission
+        appointmentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = {name: document.getElementById('patient-name').value, phone: document.getElementById('patient-phone').value, email: document.getElementById('patient-email').value, date: document.getElementById('appointment-date').value, time: document.getElementById('appointment-time').value, reason: document.getElementById('appointment-reason').value, timestamp: new Date().toISOString(), id: Date.now()};
+            saveAppointment(formData);
+            appointmentForm.reset(); appointmentModal.style.display='none'; successMessage.style.display='none';
+            showFakeLoading('Appointment Confirmed','Your appointment request has been processed successfully.');
+        });
+
+        // Function to save appointment data
+        function saveAppointment(appointmentData) {
+            // Get existing appointments from localStorage
+            let appointments = JSON.parse(localStorage.getItem('healthcareAppointments')) || [];
+            
+            // Add new appointment
+            appointments.push(appointmentData);
+            
+            // Save back to localStorage
+            localStorage.setItem('healthcareAppointments', JSON.stringify(appointments));
+            
+            console.log('Appointment saved:', appointmentData);
+            console.log('All appointments:', appointments);
+        }
+
+        // Function to load and display appointments
+        function loadAppointments() {
+            const appointments = JSON.parse(localStorage.getItem('healthcareAppointments')) || [];
+            
+            if (appointments.length === 0) {
+                appointmentsList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-calendar-times text-4xl mb-4"></i>
+                        <p>No appointments booked yet.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            appointments.forEach((appointment, index) => {
+                const date = new Date(appointment.date).toLocaleDateString();
+                const timeSlot = appointment.time === 'morning' ? 'Morning (1:00 AM - 5:00 PM)' : 'Evening (7:30 PM - 11:00 PM)';
+                
+                html += `
+                    <div class="appointment-item">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-semibold text-lg">${appointment.name}</h4>
+                                <p class="text-gray-600">
+                                    <i class="fas fa-phone mr-2"></i>${appointment.phone}
+                                    ${appointment.email ? `<br><i class="fas fa-envelope mr-2"></i>${appointment.email}` : ''}
+                                </p>
+                                <p class="text-gray-600 mt-2">
+                                    <i class="fas fa-calendar-day mr-2"></i>${date}
+                                    <br><i class="fas fa-clock mr-2"></i>${timeSlot}
+                                </p>
+                                ${appointment.reason ? `<p class="text-gray-600 mt-2"><i class="fas fa-stethoscope mr-2"></i>${appointment.reason}</p>` : ''}
+                            </div>
+                            <button class="delete-appointment text-red-500 hover:text-red-700" data-id="${appointment.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            appointmentsList.innerHTML = html;
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-appointment').forEach(button => {
+                button.addEventListener('click', function() {
+                    const appointmentId = parseInt(this.getAttribute('data-id'));
+                    deleteAppointment(appointmentId);
+                });
+            });
+        }
+
+        // Function to delete an appointment
+        function deleteAppointment(appointmentId) {
+            let appointments = JSON.parse(localStorage.getItem('healthcareAppointments')) || [];
+            appointments = appointments.filter(appointment => appointment.id !== appointmentId);
+            localStorage.setItem('healthcareAppointments', JSON.stringify(appointments));
+            loadAppointments();
+        }
+
+        // Refresh appointments list
+        refreshAppointmentsBtn.addEventListener('click', loadAppointments);
+
+        // Clear all appointments
+        clearAllAppointmentsBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete all appointments?')) {
+                localStorage.removeItem('healthcareAppointments');
+                loadAppointments();
+            }
+        });
+
+        // Export appointments to CSV
+        exportAppointmentsBtn.addEventListener('click', () => {
+            const appointments = JSON.parse(localStorage.getItem('healthcareAppointments')) || [];
+            
+            if (appointments.length === 0) {
+                alert('No appointments to export.');
+                return;
+            }
+            
+            // Create CSV content
+            let csvContent = "Name,Phone,Email,Date,Time,Reason\n";
+            appointments.forEach(appointment => {
+                const timeSlot = appointment.time === 'morning' ? 'Morning (1:00 AM - 5:00 PM)' : 'Evening (7:30 PM - 11:00 PM)';
+                const date = new Date(appointment.date).toLocaleDateString();
+                const reason = appointment.reason ? `"${appointment.reason.replace(/"/g, '""')}"` : '';
+                
+                csvContent += `"${appointment.name.replace(/"/g, '""')}",${appointment.phone},"${appointment.email || ''}",${date},${timeSlot},${reason}\n`;
+            });
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `appointments-${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        const feedbackForm = document.getElementById('feedback-form');
+        if (feedbackForm) feedbackForm.addEventListener('submit', function(e){e.preventDefault(); const f=document.getElementById('feedback-field'); if(!f.value.trim()){f.focus();return;} feedbackForm.reset(); showFakeLoading('Feedback Submitted','Thank you! Your feedback has been submitted successfully.');});
+        function showFakeLoading(successTitle, successText){const l=document.getElementById('fake-loading'),sp=document.getElementById('loading-spinner'),ok=document.getElementById('loading-success'),t=document.getElementById('loading-title'),tx=document.getElementById('loading-text');l.style.display='flex';sp.style.display='block';ok.style.display='none';t.textContent='Connecting to server...';tx.textContent='Please wait...';setTimeout(()=>{t.textContent='Processing request...';tx.textContent='Sending information...'},900);setTimeout(()=>{t.textContent='Verifying information...';tx.textContent='Almost completed...'},1800);setTimeout(()=>{sp.style.display='none';ok.style.display='block';document.getElementById('success-title').textContent=successTitle;document.getElementById('success-text').textContent=successText},2700)}
+        document.getElementById('loading-close').addEventListener('click',()=>document.getElementById('fake-loading').style.display='none');
+
+        // Set minimum date for appointment to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('appointment-date').setAttribute('min', today);
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
